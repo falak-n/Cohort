@@ -107,6 +107,16 @@ The frontend will run on `http://localhost:3000` and the backend on `http://loca
 2. Enter a question in the AI Insights section
 3. Click "Get Insights" to receive AI-generated analysis
 
+Example API request (replace <HOST> and ensure the backend is running and GEMINI_API_KEY is set):
+
+```bash
+curl -X POST "http://<HOST>/api/ai/insights" \
+  -H "Content-Type: application/json" \
+  -d '{ "query": "How many male patients are there?" }'
+```
+
+Expected behavior: The AI prompt now includes a **Gender Distribution** aggregation from the database, so the model should be able to report the count of `Male` if patients have been imported. If the model still says gender is missing, confirm the CSV was uploaded (use `GET /api/patients` to verify records).
+
 ## API Endpoints
 
 ### Patients

@@ -82,11 +82,15 @@ router.post('/insights', async (req, res) => {
       const patientStats = await Patient.aggregate([
         { $group: { _id: '$cohort', count: { $sum: 1 } } }
       ]);
+      const genderStats = await Patient.aggregate([
+        { $group: { _id: '$gender', count: { $sum: 1 } } }
+      ]);
       const sampleStats = await Sample.aggregate([
         { $group: { _id: '$disease_stage_at_specimen_collection', count: { $sum: 1 } } }
       ]);
       
       contextData = `Cohort Statistics:\n${JSON.stringify(patientStats, null, 2)}\n\n`;
+      contextData += `Gender Distribution:\n${JSON.stringify(genderStats, null, 2)}\n\n`;
       contextData += `Sample Statistics:\n${JSON.stringify(sampleStats, null, 2)}\n\n`;
     }
 
@@ -121,6 +125,41 @@ router.post('/insights', async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
     console.error('[AI /insights] Error:', error);
+  }
+});
+
+// Debug endpoint: return the constructed context used for AI prompts (no external calls)
+router.post('/context', async (req, res) => {
+  try {
+    const { query, patientId } = req.body || {};
+    let contextData = '';
+
+    if (patientId) {
+      const patient = await Patient.findOne({ patient_id: parseInt(patientId) });
+      const samples = await Sample.find({ patient_id: parseInt(patientId) }).sort({ timepoint: 1 });
+
+      contextData = `Patient Information:\n${JSON.stringify(patient, null, 2)}\n\n`;
+      contextData += `Patient Samples:\n${JSON.stringify(samples, null, 2)}\n\n`;
+    } else {
+      const patientStats = await Patient.aggregate([
+        { $group: { _id: '$cohort', count: { $sum: 1 } } }
+      ]);
+      const genderStats = await Patient.aggregate([
+        { $group: { _id: '$gender', count: { $sum: 1 } } }
+      ]);
+      const sampleStats = await Sample.aggregate([
+        { $group: { _id: '$disease_stage_at_specimen_collection', count: { $sum: 1 } } }
+      ]);
+
+      contextData = `Cohort Statistics:\n${JSON.stringify(patientStats, null, 2)}\n\n`;
+      contextData += `Gender Distribution:\n${JSON.stringify(genderStats, null, 2)}\n\n`;
+      contextData += `Sample Statistics:\n${JSON.stringify(sampleStats, null, 2)}\n\n`;
+    }
+
+    res.json({ context: contextData, query: query || 'Provide general insights about this patient cohort data', patientId: patientId || null });
+  } catch (err) {
+    console.error('[AI /context] Error:', err);
+    res.status(500).json({ error: err.message });
   }
 });
 
