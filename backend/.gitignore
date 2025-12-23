@@ -1,0 +1,5 @@
+.envnode_modules/
+.env
+uploads/
+*.log
+
