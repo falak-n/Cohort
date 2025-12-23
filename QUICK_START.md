@@ -62,19 +62,6 @@ The browser should automatically open to `http://localhost:3000`
 
 ## Troubleshooting
 
-### MongoDB Connection Error
-- Make sure MongoDB is running: `mongod` (or check your MongoDB service)
-- Verify MongoDB URI in `.env` file
-- Try: `mongodb://127.0.0.1:27017/cohort_db`
-
-### Port Already in Use
-- Backend: Change `PORT` in `.env` file
-- Frontend: React will prompt to use a different port
-
-### Gemini API Error
-- Get API key from: https://makersuite.google.com/app/apikey
-- Add to `.env` file as `GEMINI_API_KEY`
-- Restart backend server
 
 ### CSV Upload Fails
 - Check CSV file format matches expected columns
@@ -104,13 +91,5 @@ After uploading the CSV files, you should have:
 - Various cohorts (Waves1+2, Waves3+4)
 - Multiple specimen types and disease stages
 
-## Next Steps
 
-1. Explore the Dashboard statistics
-2. Try filtering patients by gender or cohort
-3. Search for specific patient IDs
-4. Use AI Insights to ask questions about the data
-5. View samples for specific patients
-
-Enjoy exploring your cohort data! 🎉
 
