@@ -83,14 +83,25 @@ router.post('/insights', async (req, res) => {
         { $group: { _id: '$cohort', count: { $sum: 1 } } }
       ]);
       const genderStats = await Patient.aggregate([
+        { $match: { gender: { $exists: true, $ne: null, $ne: '' } } },
         { $group: { _id: '$gender', count: { $sum: 1 } } }
       ]);
       const sampleStats = await Sample.aggregate([
         { $group: { _id: '$disease_stage_at_specimen_collection', count: { $sum: 1 } } }
       ]);
+
+      // Build a concise gender summary to help the LLM answer numeric questions directly
+      const genderCounts = genderStats.reduce((acc, g) => {
+        if (!g?._id) return acc;
+        acc[g._id.toLowerCase()] = g.count;
+        return acc;
+      }, {});
+      const genderSummary = Object.keys(genderCounts).length
+        ? `Gender counts -> ${Object.entries(genderCounts).map(([k, v]) => `${k}: ${v}`).join(', ')}`
+        : 'Gender counts unavailable';
       
       contextData = `Cohort Statistics:\n${JSON.stringify(patientStats, null, 2)}\n\n`;
-      contextData += `Gender Distribution:\n${JSON.stringify(genderStats, null, 2)}\n\n`;
+      contextData += `Gender Distribution:\n${JSON.stringify(genderStats, null, 2)}\nSummary: ${genderSummary}\n\n`;
       contextData += `Sample Statistics:\n${JSON.stringify(sampleStats, null, 2)}\n\n`;
     }
 
